@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque com Scanner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-md mx-auto min-h-screen p-4">
+        <header class="mb-6 text-center">
+            <h1 class="text-2xl font-bold text-blue-600">📦 Estoque Pro</h1>
+            <p class="text-gray-500 text-sm">Escaneie ou digite o código</p>
+        </header>
+
+        <main class="bg-white p-6 rounded-2xl shadow-lg">
+            <div class="space-y-4">
+                <div id="reader" class="overflow-hidden rounded-lg bg-gray-50" style="display:none;"></div>
+                
+                <button id="btn-scan" onclick="toggleScanner()" class="w-full bg-blue-100 text-blue-700 py-2 rounded-lg font-medium border border-blue-200">
+                    📷 Abrir Câmera / Scanner
+                </button>
+
+                <hr class="my-4">
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">SKU / Código do Produto</label>
+                    <input type="text" id="sku" class="mt-1 block w-full p-3 border border-gray-300 rounded-md" placeholder="Escaneado ou digitado">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Quantidade</label>
+                    <input type="number" id="qty" class="mt-1 block w-full p-3 border border-gray-300 rounded-md" placeholder="0">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-4">
+                    <button onclick="enviar('ENTRADA')" class="bg-green-600 text-white font-bold py-4 rounded-xl active:scale-95">➕ ENTRADA</button>
+                    <button onclick="enviar('SAIDA')" class="bg-red-600 text-white font-bold py-4 rounded-xl active:scale-95">➖ SAÍDA</button>
+                </div>
+            </div>
+            <div id="status" class="mt-4 text-center text-sm font-medium"></div>
+        </main>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby_RfN5vEo6Nh89aB8STrRJ0MtavZWRrIf5MGICG3RmXti2tp8ECuHqBqxxkf2tvCYWlQ/exec"; // MANTENHA SUA URL AQUI
+        let html5QrCode;
+
+        function toggleScanner() {
+            const readerDiv = document.getElementById('reader');
+            const btn = document.getElementById('btn-scan');
+
+            if (readerDiv.style.display === 'none') {
+                readerDiv.style.display = 'block';
+                btn.innerText = "🛑 Fechar Câmera";
+                startScanner();
+            } else {
+                stopScanner();
+                readerDiv.style.display = 'none';
+                btn.innerText = "📷 Abrir Câmera / Scanner";
+            }
+        }
+
+        function startScanner() {
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+
+            html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+                document.getElementById('sku').value = decodedText;
+                vibrateMobile(); // Feedback tátil
+                toggleScanner(); // Fecha após ler
+            });
+        }
+
+        function stopScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => { console.log("Câmera parada"); });
+            }
+        }
+
+        function vibrateMobile() {
+            if (navigator.vibrate) navigator.vibrate(100);
+        }
+
+        async function enviar(tipo) {
+            const sku = document.getElementById('sku').value;
+            const quantity = document.getElementById('qty').value;
+            const statusDiv = document.getElementById('status');
+
+            if(!sku || !quantity) {
+                alert("Preencha SKU e Quantidade!");
+                return;
+            }
+
+            statusDiv.innerText = "⏳ Processando...";
+            
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        sku: sku,
+                        quantity: parseInt(quantity),
+                        type: tipo
+                    })
+                });
+
+                statusDiv.innerText = "✅ Movimentação Registrada!";
+                document.getElementById('sku').value = '';
+                document.getElementById('qty').value = '';
+            } catch (error) {
+                statusDiv.innerText = "❌ Erro na conexão.";
+            }
+        }
+    </script>
+</body>
+</html>
