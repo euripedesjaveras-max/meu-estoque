@@ -3,27 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu - Sistema de Estoque</title>
+    <title>Estoque Sheets - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-6">
-    <div class="max-w-sm w-full bg-white rounded-3xl shadow-xl p-8 text-center">
-        <h1 class="text-3xl font-extrabold text-blue-600 mb-2">📦 Estoque Facil</h1>
-        <p class="text-gray-500 mb-8 text-sm">O que deseja fazer hoje?</p>
+<body class="bg-gray-50 font-sans text-gray-900">
+
+    <div class="max-w-md mx-auto min-h-screen p-6 flex flex-col">
         
-        <div class="space-y-4">
-            <a href="entries.html" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg active:scale-95">
-                ➕ Registrar Movimentação
-            </a>
+        <header class="py-8">
+            <h1 class="text-3xl font-extrabold text-blue-700 tracking-tight">Estoque Web</h1>
+            <p class="text-gray-500 font-medium">Gestão em Tempo Real</p>
+        </header>
+
+        <main class="flex-grow space-y-4">
             
-            <button onclick="alert('Módulo de consulta em desenvolvimento!')" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-4 rounded-2xl transition-all active:scale-95">
-                🔍 Consultar Saldo
-            </button>
-        </div>
-        
-        <footer class="mt-8 text-xs text-gray-400">
-            Conectado ao Google Sheets ✅
+            <a href="entries.html" class="flex items-center p-5 bg-white rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-95 group">
+                <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 text-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <i class="fa-solid fa-right-left"></i>
+                </div>
+                <div class="ml-4">
+                    <h2 class="text-lg font-bold">Movimentação</h2>
+                    <p class="text-xs text-gray-400">Registrar Entradas e Saídas</p>
+                </div>
+                <i class="fa-solid fa-chevron-right ml-auto text-gray-300"></i>
+            </a>
+
+            <a href="products.html" class="flex items-center p-5 bg-white rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-95 group">
+                <div class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 text-xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <i class="fa-solid fa-box-archive"></i>
+                </div>
+                <div class="ml-4">
+                    <h2 class="text-lg font-bold">Produtos</h2>
+                    <p class="text-xs text-gray-400">Cadastrar novos itens</p>
+                </div>
+                <i class="fa-solid fa-chevron-right ml-auto text-gray-300"></i>
+            </a>
+
+            <div class="flex items-center p-5 bg-gray-50 rounded-3xl border border-dashed border-gray-300 opacity-60">
+                <div class="w-14 h-14 bg-gray-200 rounded-2xl flex items-center justify-center text-gray-500 text-xl">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="ml-4">
+                    <h2 class="text-lg font-bold">Consulta</h2>
+                    <p class="text-xs text-gray-400">Ver saldos e inventário</p>
+                </div>
+                <span class="ml-auto text-[10px] bg-gray-200 px-2 py-1 rounded-full font-bold uppercase">Breve</span>
+            </div>
+
+        </main>
+
+        <footer class="py-6 space-y-4">
+            <div class="bg-green-50 border border-green-100 p-4 rounded-2xl flex items-center">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="ml-3 text-xs font-bold text-green-700 uppercase tracking-wider">Conectado ao Google Sheets</span>
+            </div>
+            <p class="text-center text-[10px] text-gray-400 uppercase font-bold tracking-widest italic">Dev Mode v1.2</p>
         </footer>
+
     </div>
+
 </body>
 </html>
