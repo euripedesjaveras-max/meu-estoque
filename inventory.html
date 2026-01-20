@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventário Real - Estoque</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-900">
+    <div class="max-w-4xl mx-auto p-4">
+        <header class="flex justify-between items-center py-6">
+            <a href="index.html" class="text-blue-600 font-bold">← Menu</a>
+            <h1 class="text-2xl font-black uppercase">Saldo de Estoque</h1>
+            <button onclick="carregarEstoque()" class="bg-blue-100 text-blue-700 p-2 rounded-lg">🔄</button>
+        </header>
+
+        <main class="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-500 uppercase text-[10px] font-bold tracking-widest">
+                            <th class="p-4">Produto</th>
+                            <th class="p-4">Local</th>
+                            <th class="p-4 text-center">Saldo</th>
+                            <th class="p-4 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-corpo">
+                        <tr><td colspan="4" class="p-10 text-center text-gray-400">⏳ Carregando dados...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "SUA_URL_AQUI"; 
+
+        async function carregarEstoque() {
+            const corpo = document.getElementById('tabela-corpo');
+            try {
+                const response = await fetch(`${WEB_APP_URL}?action=saldo`);
+                const dados = await response.json();
+                
+                corpo.innerHTML = ""; // Limpa carregando
+
+                dados.forEach(item => {
+                    const abaixoMinimo = item.saldo < item.minEstoque;
+                    const row = `
+                        <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                            <td class="p-4">
+                                <div class="font-bold text-sm">${item.nome}</div>
+                                <div class="text-[10px] text-gray-400">${item.sku}</div>
+                            </td>
+                            <td class="p-4 text-xs font-medium">${item.local || '-'}</td>
+                            <td class="p-4 text-center font-black ${abaixoMinimo ? 'text-red-500' : 'text-green-600'}">
+                                ${item.saldo}
+                            </td>
+                            <td class="p-4 text-center">
+                                ${abaixoMinimo ? 
+                                    '<span class="bg-red-100 text-red-600 text-[9px] font-bold px-2 py-1 rounded-full uppercase">Comprar</span>' : 
+                                    '<span class="bg-green-100 text-green-600 text-[9px] font-bold px-2 py-1 rounded-full uppercase">OK</span>'}
+                            </td>
+                        </tr>
+                    `;
+                    corpo.innerHTML += row;
+                });
+            } catch (e) {
+                corpo.innerHTML = "<tr><td colspan='4' class='p-10 text-center text-red-500'>Erro ao conectar com a planilha.</td></tr>";
+            }
+        }
+
+        window.onload = carregarEstoque;
+    </script>
+</body>
+</html>
