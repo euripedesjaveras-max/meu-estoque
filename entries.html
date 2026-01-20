@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Estoque - Profissional</title>
+    <title>Movimentação de Estoque Inteligente</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
@@ -12,9 +12,10 @@
     <div class="max-w-md mx-auto min-h-screen p-4 flex flex-col">
         
         <header class="mb-6 mt-4 flex justify-between items-center">
-            <a href="index.html" class="text-blue-600 font-bold">← Voltar</a>
+            <a href="index.html" class="text-blue-600 font-bold">← Menu</a>
             <h1 class="text-xl font-black uppercase tracking-tight">Movimentação</h1>
-            <div class="w-10"></div> </header>
+            <div class="w-10"></div>
+        </header>
 
         <main class="bg-white p-6 rounded-3xl shadow-xl space-y-5">
             
@@ -28,8 +29,10 @@
 
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">SKU do Produto</label>
-                    <input type="text" id="sku" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Digite ou escaneie">
+                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">SKU / Pesquisar Produto</label>
+                    <input list="produtos-list" id="sku" oninput="validarSKU()" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Digite ou selecione...">
+                    <datalist id="produtos-list"></datalist>
+                    <p id="sku-msg" class="text-[10px] font-bold mt-1 ml-1"></p>
                 </div>
 
                 <div>
@@ -38,40 +41,85 @@
                 </div>
 
                 <div>
-                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">Motivo da Ação</label>
-                    <input type="text" id="reason" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ex: Compra, Venda, Ajuste">
+                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">Motivo</label>
+                    <input type="text" id="reason" class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ex: Venda, Reposição...">
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4 pt-2">
-                <button onclick="enviar('ENTRADA')" class="bg-green-500 hover:bg-green-600 text-white font-black py-5 rounded-2xl shadow-lg shadow-green-100 transition-all active:scale-95">
+                <button id="btn-entrada" onclick="enviar('ENTRADA')" class="bg-green-500 text-white font-black py-5 rounded-2xl shadow-lg active:scale-95 disabled:opacity-30">
                     ➕ ENTRADA
                 </button>
-                <button onclick="enviar('SAIDA')" class="bg-red-500 hover:bg-red-600 text-white font-black py-5 rounded-2xl shadow-lg shadow-red-100 transition-all active:scale-95">
+                <button id="btn-saida" onclick="enviar('SAIDA')" class="bg-red-500 text-white font-black py-5 rounded-2xl shadow-lg active:scale-95 disabled:opacity-30">
                     ➖ SAÍDA
                 </button>
             </div>
 
             <div id="status" class="text-center text-sm font-bold pt-2"></div>
         </main>
-
-        <footer class="mt-auto py-6 text-center text-gray-400 text-xs">
-            Sistema Conectado ao Google Sheets
-        </footer>
     </div>
 
     <script>
-        // ATENÇÃO: COLOQUE SUA URL DO GOOGLE APPS SCRIPT AQUI
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby_RfN5vEo6Nh89aB8STrRJ0MtavZWRrIf5MGICG3RmXti2tp8ECuHqBqxxkf2tvCYWlQ/exec"; 
+        // COLOQUE SUA URL DO GOOGLE APPS SCRIPT AQUI
+        const WEB_APP_URL = "SUA_URL_DA_IMPLANTACAO_AQUI"; 
         
         let html5QrCode;
+        let produtosCadastrados = [];
 
+        // 1. Carregar lista de produtos ao iniciar para o Datalist e Validação
+        window.onload = async () => {
+            const statusDiv = document.getElementById('status');
+            try {
+                const response = await fetch(WEB_APP_URL);
+                produtosCadastrados = await response.json();
+                const listElement = document.getElementById('produtos-list');
+                
+                produtosCadastrados.forEach(p => {
+                    let option = document.createElement('option');
+                    option.value = p.sku;
+                    option.innerText = p.nome;
+                    listElement.appendChild(option);
+                });
+            } catch (e) {
+                console.error("Erro ao carregar lista de produtos");
+                statusDiv.innerText = "⚠️ Erro ao carregar lista de produtos.";
+            }
+        };
+
+        // 2. Validação de SKU em tempo real
+        function validarSKU() {
+            const skuDigitado = document.getElementById('sku').value;
+            const msgElement = document.getElementById('sku-msg');
+            const btnEntrada = document.getElementById('btn-entrada');
+            const btnSaida = document.getElementById('btn-saida');
+            
+            if (!skuDigitado) {
+                msgElement.innerText = "";
+                return;
+            }
+
+            const produto = produtosCadastrados.find(p => p.sku.toLowerCase() === skuDigitado.toLowerCase());
+
+            if (produto) {
+                msgElement.innerText = "✅ PRODUTO: " + produto.nome;
+                msgElement.className = "text-[10px] font-bold mt-1 ml-1 text-green-600 uppercase";
+                btnEntrada.disabled = false;
+                btnSaida.disabled = false;
+            } else {
+                msgElement.innerText = "❌ SKU NÃO CADASTRADO! VÁ EM 'PRODUTOS'.";
+                msgElement.className = "text-[10px] font-bold mt-1 ml-1 text-red-500 uppercase";
+                btnEntrada.disabled = true;
+                btnSaida.disabled = true;
+            }
+        }
+
+        // --- Lógica do Scanner (Mantida) ---
         function toggleScanner() {
             const readerDiv = document.getElementById('reader');
             const btn = document.getElementById('btn-scan');
             if (readerDiv.style.display === 'none') {
                 readerDiv.style.display = 'block';
-                btn.innerText = "🛑 FECHAR CÂMERA";
+                btn.innerText = "🛑 PARAR SCANNER";
                 startScanner();
             } else {
                 stopScanner();
@@ -85,59 +133,51 @@
             const config = { fps: 10, qrbox: { width: 250, height: 150 } };
             html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
                 document.getElementById('sku').value = decodedText;
+                validarSKU(); // Valida automaticamente após o scan
                 if (navigator.vibrate) navigator.vibrate(100);
                 toggleScanner();
             });
         }
 
         function stopScanner() {
-            if (html5QrCode) html5QrCode.stop();
+            if (html5QrCode) html5QrCode.stop().catch(() => {});
         }
 
+        // --- Lógica de Envio (Mantida com bloqueio de erro) ---
         async function enviar(tipo) {
             const sku = document.getElementById('sku').value;
             const qty = document.getElementById('qty').value;
             const reason = document.getElementById('reason').value;
             const statusDiv = document.getElementById('status');
 
-            if(!sku || !qty) {
-                alert("Preencha SKU e Quantidade!");
-                return;
-            }
-
-            statusDiv.innerText = "⏳ PROCESSANDO...";
+            statusDiv.innerText = "⏳ ENVIANDO...";
             statusDiv.className = "text-center text-sm font-bold pt-2 text-blue-500";
 
-            // Criamos o objeto exatamente como o "Cérebro" espera receber
-            const payload = {
-                sku: sku,
-                quantity: parseInt(qty),
-                type: tipo,
-                reason: reason || "Não informado"
-            };
-
             try {
-                // Enviando para o Google Sheets
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Importante para o Google Script
-                    body: JSON.stringify(payload)
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        sku: sku,
+                        quantity: parseInt(qty),
+                        type: tipo,
+                        reason: reason || "Não informado"
+                    })
                 });
 
-                statusDiv.innerText = "✅ REGISTRADO COM SUCESSO!";
+                statusDiv.innerText = "✅ SUCESSO!";
                 statusDiv.className = "text-center text-sm font-bold pt-2 text-green-600";
                 
-                // Limpa campos
                 document.getElementById('sku').value = '';
                 document.getElementById('qty').value = '';
                 document.getElementById('reason').value = '';
+                document.getElementById('sku-msg').innerText = '';
 
             } catch (error) {
-                statusDiv.innerText = "❌ ERRO AO CONECTAR.";
+                statusDiv.innerText = "❌ ERRO DE CONEXÃO.";
                 statusDiv.className = "text-center text-sm font-bold pt-2 text-red-600";
             }
         }
     </script>
 </body>
 </html>
-
