@@ -34,6 +34,11 @@
                     <input type="number" id="qty" class="mt-1 block w-full p-3 border border-gray-300 rounded-md" placeholder="0">
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Motivo (Opcional)</label>
+                    <input type="text" id="reason" class="mt-1 block w-full p-3 border border-gray-300 rounded-md" placeholder="Ex: Compra mensal, Ajuste, Brinde">
+                </div>
+
                 <div class="grid grid-cols-2 gap-4 pt-4">
                     <button onclick="enviar('ENTRADA')" class="bg-green-600 text-white font-bold py-4 rounded-xl active:scale-95">➕ ENTRADA</button>
                     <button onclick="enviar('SAIDA')" class="bg-red-600 text-white font-bold py-4 rounded-xl active:scale-95">➖ SAÍDA</button>
@@ -83,36 +88,41 @@
             if (navigator.vibrate) navigator.vibrate(100);
         }
 
-        async function enviar(tipo) {
-            const sku = document.getElementById('sku').value;
-            const quantity = document.getElementById('qty').value;
-            const statusDiv = document.getElementById('status');
+async function enviar(tipo) {
+    const sku = document.getElementById('sku').value;
+    const qty = document.getElementById('qty').value;
+    const reason = document.getElementById('reason').value; // Captura o motivo
+    const statusDiv = document.getElementById('status');
 
-            if(!sku || !quantity) {
-                alert("Preencha SKU e Quantidade!");
-                return;
-            }
+    if(!sku || !qty) {
+        alert("Preencha SKU e Quantidade!");
+        return;
+    }
 
-            statusDiv.innerText = "⏳ Processando...";
-            
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({
-                        sku: sku,
-                        quantity: parseInt(quantity),
-                        type: tipo
-                    })
-                });
+    statusDiv.innerText = "⏳ Enviando...";
+    
+    try {
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({
+                sku: sku,
+                quantity: parseInt(qty),
+                type: tipo,
+                reason: reason // Envia o motivo para a planilha
+            })
+        });
 
-                statusDiv.innerText = "✅ Movimentação Registrada!";
-                document.getElementById('sku').value = '';
-                document.getElementById('qty').value = '';
-            } catch (error) {
-                statusDiv.innerText = "❌ Erro na conexão.";
-            }
-        }
+        statusDiv.innerText = "✅ Sucesso!";
+        // Limpa os campos após enviar
+        document.getElementById('sku').value = '';
+        document.getElementById('qty').value = '';
+        document.getElementById('reason').value = '';
+    } catch (error) {
+        statusDiv.innerText = "❌ Erro ao enviar.";
+    }
+}
     </script>
 </body>
+
 </html>
