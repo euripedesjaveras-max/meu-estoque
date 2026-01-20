@@ -3,70 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Estoque - Home</title>
+    <title>Estoque Pro - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 font-sans text-gray-900">
+<body class="bg-gray-100 font-sans text-gray-900">
 
-    <div class="max-w-md mx-auto min-h-screen p-6 flex flex-col">
-        
-        <header class="py-10 text-center">
-            <div class="inline-block p-3 bg-blue-600 rounded-2xl shadow-lg mb-4">
-                <i class="fa-solid fa-warehouse text-white text-2xl"></i>
+    <div class="max-w-6xl mx-auto p-4 lg:p-8">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-black text-blue-800">DASHBOARD</h1>
+                <p class="text-gray-500 italic">Visão Geral do Estoque</p>
             </div>
-            <h1 class="text-3xl font-black text-gray-800 tracking-tight">Estoque Pro</h1>
-            <p class="text-gray-500 text-sm font-medium">Controle Integrado Google Sheets</p>
+            <div class="flex gap-2">
+                <a href="entries.html" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-700">＋ Movimentar</a>
+                <a href="products.html" class="bg-gray-800 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-black">📦 Produtos</a>
+            </div>
         </header>
 
-        <main class="flex-grow space-y-4">
-            
-            <a href="inventory.html" class="flex items-center p-5 bg-white rounded-3xl shadow-sm border border-gray-100 hover:border-green-200 hover:shadow-md transition-all active:scale-95 group">
-                <div class="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center text-green-600 text-xl group-hover:bg-green-600 group-hover:text-white transition-colors">
-                    <i class="fa-solid fa-chart-line"></i>
-                </div>
-                <div class="ml-4">
-                    <h2 class="text-lg font-bold text-gray-800">Saldo Atual</h2>
-                    <p class="text-xs text-gray-400">Consultar inventário e alertas</p>
-                </div>
-                <i class="fa-solid fa-chevron-right ml-auto text-gray-300"></i>
-            </a>
-
-            <a href="entries.html" class="flex items-center p-5 bg-white rounded-3xl shadow-sm border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all active:scale-95 group">
-                <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 text-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    <i class="fa-solid fa-right-left"></i>
-                </div>
-                <div class="ml-4">
-                    <h2 class="text-lg font-bold text-gray-800">Movimentação</h2>
-                    <p class="text-xs text-gray-400">Entradas, saídas e ajustes</p>
-                </div>
-                <i class="fa-solid fa-chevron-right ml-auto text-gray-300"></i>
-            </a>
-
-            <a href="products.html" class="flex items-center p-5 bg-white rounded-3xl shadow-sm border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all active:scale-95 group">
-                <div class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 text-xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                    <i class="fa-solid fa-plus"></i>
-                </div>
-                <div class="ml-4">
-                    <h2 class="text-lg font-bold text-gray-800">Cadastrar Produto</h2>
-                    <p class="text-xs text-gray-400">Novo item, SKU e localização</p>
-                </div>
-                <i class="fa-solid fa-chevron-right ml-auto text-gray-300"></i>
-            </a>
-
-        </main>
-
-        <footer class="py-8">
-            <div class="bg-gray-100 rounded-2xl p-4 flex items-center justify-between">
-                <div class="flex items-center">
-                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span class="ml-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sistema Ativo</span>
-                </div>
-                <span class="text-[10px] text-gray-400 font-mono">v1.5</span>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border-l-8 border-blue-500">
+                <p class="text-gray-400 text-xs font-bold uppercase">Total de Itens (SKUs)</p>
+                <h2 id="total-skus" class="text-3xl font-black text-gray-800">--</h2>
             </div>
-        </footer>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border-l-8 border-red-500">
+                <p class="text-gray-400 text-xs font-bold uppercase">Abaixo do Mínimo</p>
+                <h2 id="low-stock" class="text-3xl font-black text-red-600">--</h2>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border-l-8 border-green-500">
+                <p class="text-gray-400 text-xs font-bold uppercase">Patrimônio Estimado</p>
+                <h2 id="total-value" class="text-3xl font-black text-green-700">R$ --</h2>
+            </div>
+        </div>
 
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white p-6 rounded-3xl shadow-sm">
+                <h3 class="font-bold text-gray-700 mb-4 uppercase text-sm tracking-widest">Nível de Saúde</h3>
+                <canvas id="chartHealth"></canvas>
+            </div>
+            
+            <div class="bg-white p-6 rounded-3xl shadow-sm">
+                <h3 class="font-bold text-gray-700 mb-4 uppercase text-sm tracking-widest">Top 5 em Estoque</h3>
+                <canvas id="chartTopProducts"></canvas>
+            </div>
+        </div>
+
+        <div class="text-center py-4">
+            <a href="inventory.html" class="text-blue-600 font-bold hover:underline">Ver Tabela de Inventário Completa →</a>
+        </div>
     </div>
 
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby_RfN5vEo6Nh89aB8STrRJ0MtavZWRrIf5MGICG3RmXti2tp8ECuHqBqxxkf2tvCYWlQ/exec";
+
+        async function initDashboard() {
+            try {
+                const response = await fetch(`${WEB_APP_URL}?action=saldo`);
+                const data = await response.json();
+
+                // 1. Processamento de Dados
+                const totalSkus = data.length;
+                const lowStockItems = data.filter(i => i.saldo < i.minEstoque).length;
+                const totalValue = data.reduce((acc, i) => acc + (i.saldo * i.preco), 0);
+
+                // 2. Atualizar Cards
+                document.getElementById('total-skus').innerText = totalSkus;
+                document.getElementById('low-stock').innerText = lowStockItems;
+                document.getElementById('total-value').innerText = `R$ ${totalValue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+                // 3. Gerar Gráfico de Saúde (Pizza)
+                new Chart(document.getElementById('chartHealth'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Em Estoque OK', 'Abaixo do Mínimo'],
+                        datasets: [{
+                            data: [totalSkus - lowStockItems, lowStockItems],
+                            backgroundColor: ['#10b981', '#ef4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { plugins: { legend: { position: 'bottom' } } }
+                });
+
+                // 4. Gerar Gráfico Top 5 (Barras)
+                const top5 = [...data].sort((a, b) => b.saldo - a.saldo).slice(0, 5);
+                new Chart(document.getElementById('chartTopProducts'), {
+                    type: 'bar',
+                    data: {
+                        labels: top5.map(i => i.nome),
+                        datasets: [{
+                            label: 'Saldo Atual',
+                            data: top5.map(i => i.saldo),
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 10
+                        }]
+                    },
+                    options: { 
+                        indexAxis: 'y',
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+            } catch (err) {
+                console.error("Erro ao carregar dashboard", err);
+            }
+        }
+
+        window.onload = initDashboard;
+    </script>
 </body>
 </html>
