@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Produtos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-md mx-auto min-h-screen p-4">
+        <header class="mb-6 flex justify-between items-center">
+            <a href="index.html" class="text-blue-600 font-bold">← Voltar</a>
+            <h1 class="text-xl font-black uppercase">Novo Produto</h1>
+            <div class="w-10"></div>
+        </header>
+
+        <main class="bg-white p-6 rounded-3xl shadow-xl space-y-4">
+            <div>
+                <label class="text-xs font-bold text-gray-400 uppercase ml-1">SKU (Código de Barras)</label>
+                <input type="text" id="sku" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: 789123456">
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-gray-400 uppercase ml-1">Nome do Produto</label>
+                <input type="text" id="name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: Caderno 10 Matérias">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">Categoria</label>
+                    <input type="text" id="category" class="w-full p-4 bg-gray-50 rounded-2xl outline-none" placeholder="Papelaria">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">Estoque Mín.</label>
+                    <input type="number" id="minStock" class="w-full p-4 bg-gray-50 rounded-2xl outline-none" placeholder="5">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">Preço Custo</label>
+                    <input type="number" step="0.01" id="costPrice" class="w-full p-4 bg-gray-50 rounded-2xl outline-none" placeholder="0.00">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">Localização</label>
+                    <input type="text" id="location" class="w-full p-4 bg-gray-50 rounded-2xl outline-none" placeholder="Ex: A-12">
+                </div>
+            </div>
+
+            <button onclick="salvarProduto()" class="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-lg active:scale-95 transition-all">
+                💾 SALVAR NA PLANILHA
+            </button>
+
+            <div id="status" class="text-center text-sm font-bold pt-2"></div>
+        </main>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby_RfN5vEo6Nh89aB8STrRJ0MtavZWRrIf5MGICG3RmXti2tp8ECuHqBqxxkf2tvCYWlQ/exec";
+
+        async function salvarProduto() {
+            const statusDiv = document.getElementById('status');
+            const payload = {
+                action: "cadastrarProduto",
+                sku: document.getElementById('sku').value,
+                name: document.getElementById('name').value,
+                category: document.getElementById('category').value,
+                minStock: document.getElementById('minStock').value,
+                costPrice: document.getElementById('costPrice').value,
+                location: document.getElementById('location').value
+            };
+
+            if(!payload.sku || !payload.name) {
+                alert("SKU e Nome são obrigatórios!");
+                return;
+            }
+
+            statusDiv.innerText = "⏳ SALVANDO PRODUTO...";
+            statusDiv.className = "text-center text-sm font-bold text-blue-500";
+            
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(payload)
+                });
+
+                statusDiv.innerText = "✅ CADASTRADO COM SUCESSO!";
+                statusDiv.className = "text-center text-sm font-bold text-green-600";
+                
+                // Limpa todos os campos
+                ["sku", "name", "category", "minStock", "costPrice", "location"].forEach(id => document.getElementById(id).value = "");
+            } catch (e) {
+                statusDiv.innerText = "❌ ERRO AO SALVAR.";
+                statusDiv.className = "text-center text-sm font-bold text-red-600";
+            }
+        }
+    </script>
+</body>
+</html>
