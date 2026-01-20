@@ -1,10 +1,12 @@
+//codigo v1
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Produtos</title>
+    <title>Cadastro de Produtos - Scanner</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body class="bg-gray-100 font-sans">
     <div class="max-w-md mx-auto min-h-screen p-4">
@@ -15,9 +17,18 @@
         </header>
 
         <main class="bg-white p-6 rounded-3xl shadow-xl space-y-4">
+            
+            <div id="reader" class="overflow-hidden rounded-2xl bg-black" style="display:none;"></div>
+            
+            <button id="btn-scan" onclick="toggleScanner()" class="w-full bg-indigo-50 text-indigo-700 py-3 rounded-2xl font-bold border-2 border-indigo-100 transition-all active:scale-95">
+                📷 ESCANEAR CÓDIGO DE BARRAS
+            </button>
+
+            <hr class="border-gray-100">
+
             <div>
-                <label class="text-xs font-bold text-gray-400 uppercase ml-1">SKU (Código de Barras)</label>
-                <input type="text" id="sku" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: 789123456">
+                <label class="text-xs font-bold text-gray-400 uppercase ml-1">SKU (Código)</label>
+                <input type="text" id="sku" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" placeholder="Escaneie ou digite">
             </div>
 
             <div>
@@ -43,12 +54,12 @@
                 </div>
                 <div>
                     <label class="text-xs font-bold text-gray-400 uppercase ml-1">Localização</label>
-                    <input type="text" id="location" class="w-full p-4 bg-gray-50 rounded-2xl outline-none" placeholder="Ex: A-12">
+                    <input type="text" id="location" class="w-full p-4 bg-gray-50 rounded-2xl outline-none" placeholder="Ex: Prateleira A1">
                 </div>
             </div>
 
             <button onclick="salvarProduto()" class="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-lg active:scale-95 transition-all">
-                💾 SALVAR NA PLANILHA
+                💾 SALVAR PRODUTO
             </button>
 
             <div id="status" class="text-center text-sm font-bold pt-2"></div>
@@ -56,7 +67,38 @@
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby_RfN5vEo6Nh89aB8STrRJ0MtavZWRrIf5MGICG3RmXti2tp8ECuHqBqxxkf2tvCYWlQ/exec";
+        // MANTENHA SUA URL AQUI
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby_RfN5vEo6Nh89aB8STrRJ0MtavZWRrIf5MGICG3RmXti2tp8ECuHqBqxxkf2tvCYWlQ/exec"; 
+        
+        let html5QrCode;
+
+        function toggleScanner() {
+            const readerDiv = document.getElementById('reader');
+            const btn = document.getElementById('btn-scan');
+            if (readerDiv.style.display === 'none') {
+                readerDiv.style.display = 'block';
+                btn.innerText = "🛑 PARAR SCANNER";
+                startScanner();
+            } else {
+                stopScanner();
+                readerDiv.style.display = 'none';
+                btn.innerText = "📷 ESCANEAR CÓDIGO DE BARRAS";
+            }
+        }
+
+        function startScanner() {
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+            html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+                document.getElementById('sku').value = decodedText;
+                if (navigator.vibrate) navigator.vibrate(100);
+                toggleScanner(); // Fecha após ler
+            });
+        }
+
+        function stopScanner() {
+            if (html5QrCode) html5QrCode.stop().catch(err => console.log(err));
+        }
 
         async function salvarProduto() {
             const statusDiv = document.getElementById('status');
@@ -75,8 +117,8 @@
                 return;
             }
 
-            statusDiv.innerText = "⏳ SALVANDO PRODUTO...";
-            statusDiv.className = "text-center text-sm font-bold text-blue-500";
+            statusDiv.innerText = "⏳ ENVIANDO PARA PLANILHA...";
+            statusDiv.className = "text-center text-sm font-bold text-blue-500 pt-2";
             
             try {
                 await fetch(WEB_APP_URL, {
@@ -85,14 +127,14 @@
                     body: JSON.stringify(payload)
                 });
 
-                statusDiv.innerText = "✅ CADASTRADO COM SUCESSO!";
-                statusDiv.className = "text-center text-sm font-bold text-green-600";
+                statusDiv.innerText = "✅ PRODUTO CADASTRADO!";
+                statusDiv.className = "text-center text-sm font-bold text-green-600 pt-2";
                 
-                // Limpa todos os campos
+                // Limpa campos
                 ["sku", "name", "category", "minStock", "costPrice", "location"].forEach(id => document.getElementById(id).value = "");
             } catch (e) {
                 statusDiv.innerText = "❌ ERRO AO SALVAR.";
-                statusDiv.className = "text-center text-sm font-bold text-red-600";
+                statusDiv.className = "text-center text-sm font-bold text-red-600 pt-2";
             }
         }
     </script>
